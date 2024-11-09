@@ -723,6 +723,12 @@ static void checkForSignal()
     gpio_mode_set_input(input_pin, GPIO_PULL_DOWN);
 	
     delayMicroseconds(500);
+ 
+    for(int i = 0 ; i < 500; i ++){		// conditional delays to avoid bootloader when control device signal pin is high during init
+	if(gpio_read(input_pin) && !bl_was_software_reset()){
+		delayMicroseconds(40);
+ 	}
+    }
 
     for(int i = 0 ; i < 500; i ++){
 	if(!gpio_read(input_pin)){
@@ -732,7 +738,7 @@ static void checkForSignal()
 
 	delayMicroseconds(10);
     }
-    if (low_pin_count > 450) {
+    if (low_pin_count > 450) { 		// pulled low & majority stayed low - jump to application
 #if CHECK_SOFTWARE_RESET
         if (!bl_was_software_reset()) {
 	    jump();
@@ -755,7 +761,7 @@ static void checkForSignal()
 	delayMicroseconds(10);
     }
     if (low_pin_count == 0) {
-	return;           // all high while pin is pulled low, bootloader signal
+	return; 		// pulled high & never low in history - stay in bootloader only
     }
 
     low_pin_count = 0;
@@ -772,11 +778,11 @@ static void checkForSignal()
 	delayMicroseconds(10);
     }
     if (low_pin_count == 0) {
-	return;            // when floated all
+	return;		// floating & no new low - stay in bootloader only
     }
 
     if (low_pin_count > 0) {
-	jump();
+	jump();		// floating & low at least once - jump to application
     }
 }
 
