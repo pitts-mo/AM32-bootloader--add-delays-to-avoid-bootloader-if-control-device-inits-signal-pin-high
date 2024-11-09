@@ -725,7 +725,7 @@ static void checkForSignal()
     delayMicroseconds(500);
  
     for(int i = 0 ; i < 500; i ++){		// conditional delays to avoid bootloader when control device signal pin is high during init
-	if(gpio_read(input_pin) && !bl_was_software_reset()){
+	if(gpio_read(input_pin)){
 		delayMicroseconds(40);
  	}
     }
